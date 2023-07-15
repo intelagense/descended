@@ -34,11 +34,14 @@ Game._generateMap = function () {
     this._createPlayer(freeCells);
 }
 
+Game.chronos = null;
+
 Game._generateArtifacts = function (freeCells) {
     for (let i = 0; i < 10; i++) {
         let index = Math.floor(ROT.RNG.getUniform() * freeCells.length);
         let key = freeCells.splice(index, 1)[0];
-        this.map[key] = "*"
+        this.map[key] = "§"
+        if (!i) { this.chronos = key; } // first artifact is chronos
     }
 }
 
@@ -92,6 +95,11 @@ Player.prototype.handleEvent = function (e) {
 
     let code = e.keyCode;
 
+    if (code == 32) {
+        this._checkArtifact();
+        return;
+    }
+
     if (!(code in keyMap)) { return; }
 
     let diff = ROT.DIRS[8][keyMap[code]];
@@ -109,3 +117,15 @@ Player.prototype.handleEvent = function (e) {
     Game.engine.unlock()
 }
 
+Player.prototype._checkArtifact = function () {
+    let key = `${this._x},${this._y}`;
+    if (Game.map[key] != "§") {
+        alert("Just the cold rocky floor.");
+    } else if (key == Game.chronos) {
+        alert("You have discovered 'Chronos.' The end.");
+        Game.engine.lock();
+        window.removeEventListener("keydown", this);
+    } else {
+        alert("Just an old ugly rock.")
+    }
+}
